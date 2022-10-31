@@ -12,20 +12,20 @@ void alghoritmEvclida(int x, int y);
 int main() {
     ifstream input("../data.txt");
     float ch;
-    int Count = 0;
+    int count = 0;
     while (input >> ch)
-        Count++;
+        count++;
     input.close();
 
-    int *mass = new int[Count];
+    int *mass = new int[count];
     ifstream file("../data.txt");
-    for(int i=0; i<Count; i++) {
+    for(int i=0; i<count; i++) {
         file>>mass[i];
     }
 
     auto begin = std::chrono::steady_clock::now();
     DelegationModel pool;
-    for( int i = 0; i < Count; i+=2 ) {
+    for( int i = 0; i < count; i+=2 ) {
         cout << i << endl;
         pool.add_job([mass, i]() {
             cout << "Задача отпралвена\n";
