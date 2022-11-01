@@ -39,7 +39,7 @@ namespace del {
             //цикл работает пока мы не установли флаг выхода из проги
             while(!done) {
                 //получаем работу
-                auto res = next_job();
+                auto res = get_job();
                 //выполняем работу
                 res();
                 cout << "задача выполнена\n";
@@ -49,7 +49,7 @@ namespace del {
         }
 
         //достаем задачу из начала списка и выполняем ее
-        function<void(void)> next_job() {
+        function<void(void)> get_job() {
             function<void(void)> res;
             //хватаем мьютекс
             unique_lock<mutex> job_lock(list_task_mutex);
@@ -93,10 +93,10 @@ namespace del {
             if(!list_tasks.empty()) {
                 unique_lock<std::mutex> lk(wait_mutex);
                 //waitим пока не поступил сигнал о завершении задачи
-                //далее идет проверка, если список задач пуст, то мы выходим из метода
+                //далее идет проверка, если список задач пуст, то мы выходим из цикла
                 //иначе мы возвращаемся в эту же точку и ждем следующего сигнала
                 //и так по кругу пока список задач не пуст
-                //и для этого нужен мьюеткс
+                //и для этого нужен unique_lock
                 task_complite.wait(lk, [this] {
                     cout << "еще осталось " << list_tasks.size() << " задач" << endl;
                     return this->list_tasks.empty();
