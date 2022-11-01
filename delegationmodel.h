@@ -11,7 +11,7 @@ using namespace std;
 
 namespace del {
     //количество потоков
-    template <unsigned num_threads = 8>
+    const unsigned num_threads = 8;
     //очень просто, нам на вход поступает задача и при помощи методов с++ мы уведомляем поток о прибытии задачи
     //и собственно выполняем задачу
     //выполняеи задчи до тех пор пока мы не установим флаг на done
@@ -42,7 +42,7 @@ namespace del {
                 auto res = get_job();
                 //выполняем работу
                 res();
-                cout << "задача выполнена\n";
+                //cout << "задача выполнена\n";
                 //уведолмяем wait_all о завершении задачи и проверки на выход
                 task_complite.notify_one();
             }
@@ -53,10 +53,10 @@ namespace del {
             function<void(void)> res;
             //хватаем мьютекс
             unique_lock<mutex> job_lock(list_task_mutex);
-            cout << "поток прибыл и ждет задачу\n";
+            //cout << "поток прибыл и ждет задачу\n";
             //ожидаем поступления задачи
             job_added.wait(job_lock, [this]() ->bool { return !list_tasks.empty() || done; } );
-            cout << "поток взял задачу\n";
+            //cout << "поток взял задачу\n";
             if(!done) {
                 //берем функцию из самого начала
                 res = list_tasks.front();
@@ -75,11 +75,11 @@ namespace del {
         DelegationModel()
         {
             for(int i = 0; i < num_threads; ++i) {
-                threads[i] = thread([=] { potok(); });
+                threads[i] = thread([=] {potok();});
             }
         }
 
-        void add_job(function<void(void)> job) {
+        void add_job(const function<void(void)>& job) {
             //создаем мьютекс
             lock_guard<std::mutex> guard(list_task_mutex);
             //добавлем заадачу в конец коллекции
@@ -89,7 +89,7 @@ namespace del {
         }
 
         void join_all() {
-            cout <<"мы тут\n";
+            //cout <<"мы тут\n";
             if(!list_tasks.empty()) {
                 unique_lock<std::mutex> lk(wait_mutex);
                 //waitим пока не поступил сигнал о завершении задачи
@@ -98,10 +98,10 @@ namespace del {
                 //и так по кругу пока список задач не пуст
                 //и для этого нужен unique_lock
                 task_complite.wait(lk, [this] {
-                    cout << "еще осталось " << list_tasks.size() << " задач" << endl;
+                    //cout << "еще осталось " << list_tasks.size() << " задач" << endl;
                     return this->list_tasks.empty();
                 });
-                cout << "все задачи выполнены можем завершать работу\n";
+                //cout << "все задачи выполнены можем завершать работу\n";
                 //разблочим мьютекс
                 lk.unlock();
             }

@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "delegationmodel.h"
-#include <omp.h>
+
 
 using namespace std;
 using namespace del;
@@ -26,9 +26,9 @@ int main() {
     auto begin = std::chrono::steady_clock::now();
     DelegationModel pool;
     for( int i = 0; i < count; i+=2 ) {
-        cout << i << endl;
+        //cout << i << endl;
         pool.add_job([mass, i]() {
-            cout << "Задача отпралвена\n";
+            //cout << "Задача отпралвена\n";
             alghoritmEvclida(mass[i], mass[i + 1]);
         });
     }
