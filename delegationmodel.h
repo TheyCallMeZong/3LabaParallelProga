@@ -29,9 +29,9 @@ namespace del {
         //уведомляем метод wait_all о завершении выполнения задачи
         condition_variable task_complite;
         //мютекс для захвата (check ласт метод)
-        mutex wait_mutex;
+        mutex join_mutex;
         //мютекс для добавления/чтения задачи (думаю не стоит объяснять зачем)
-        mutex list_task_mutex;
+        mutex task_mutex;
         //чтобы подвтвердить что все оперции были выполнены
         atomic<int> t = 0;
 
@@ -52,7 +52,7 @@ namespace del {
         function<void(void)> get_job() {
             function<void(void)> res;
             //хватаем мьютекс
-            unique_lock<mutex> job_lock(list_task_mutex);
+            unique_lock<mutex> job_lock(task_mutex);
             //cout << "поток прибыл и ждет задачу\n";
             //ожидаем поступления задачи
             job_added.wait(job_lock, [this]() ->bool { return !list_tasks.empty() || done; } );
@@ -81,7 +81,7 @@ namespace del {
 
         void add_job(const function<void(void)>& job) {
             //создаем мьютекс
-            lock_guard<std::mutex> guard(list_task_mutex);
+            lock_guard<std::mutex> guard(task_mutex);
             //добавлем заадачу в конец коллекции
             list_tasks.emplace_back(job);
             //уведомляем поток о прибытии задачи
@@ -91,7 +91,7 @@ namespace del {
         void join_all() {
             //cout <<"мы тут\n";
             if(!list_tasks.empty()) {
-                unique_lock<std::mutex> lk(wait_mutex);
+                unique_lock<std::mutex> lk(join_mutex);
                 //waitим пока не поступил сигнал о завершении задачи
                 //далее идет проверка, если список задач пуст, то мы выходим из цикла
                 //иначе мы возвращаемся в эту же точку и ждем следующего сигнала

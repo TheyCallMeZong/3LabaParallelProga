@@ -2,12 +2,16 @@
 #include <fstream>
 #include <string>
 #include "delegationmodel.h"
-
+#include <string_view>
+#include <sstream>
 
 using namespace std;
 using namespace del;
 
 void alghoritmEvclida(int x, int y);
+
+template<typename T>
+string toString(T val);
 
 int main() {
     ifstream input("../data.txt");
@@ -52,10 +56,19 @@ void alghoritmEvclida(int x, int y){
         }
     }
     ofstream out;
-    out.open(file_name);
+    auto t= this_thread::get_id();
+    out.open("../" +toString(t) + ".txt", ios::app);
     if (out.is_open())
     {
         out << x << std::endl;
     }
     out.close();
+}
+
+template <typename T>
+std::string toString(T val)
+{
+    std::ostringstream oss;
+    oss<< val;
+    return oss.str();
 }
