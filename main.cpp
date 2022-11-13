@@ -56,8 +56,9 @@ void alghoritmEvclida(int x, int y){
         }
     }
     ofstream out;
-    auto t= this_thread::get_id();
-    out.open("../" +toString(t) + ".txt", ios::app);
+    //auto t= this_thread::get_id();
+    //out.open("../" +toString(t) + ".txt", ios::app);
+    out.open(file_name);
     if (out.is_open())
     {
         out << x << std::endl;

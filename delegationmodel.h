@@ -75,7 +75,7 @@ namespace del {
         DelegationModel()
         {
             for(int i = 0; i < num_threads; ++i) {
-                threads[i] = thread([=] {potok();});
+                threads[i] = thread([this] {potok();});
             }
         }
 
@@ -90,29 +90,28 @@ namespace del {
 
         void join_all() {
             //cout <<"мы тут\n";
-            if(!list_tasks.empty()) {
-                unique_lock<std::mutex> lk(join_mutex);
-                //waitим пока не поступил сигнал о завершении задачи
-                //далее идет проверка, если список задач пуст, то мы выходим из цикла
-                //иначе мы возвращаемся в эту же точку и ждем следующего сигнала
-                //и так по кругу пока список задач не пуст
-                //и для этого нужен unique_lock
-                task_complite.wait(lk, [this] {
-                    //cout << "еще осталось " << list_tasks.size() << " задач" << endl;
-                    return this->list_tasks.empty();
-                });
-                //cout << "все задачи выполнены можем завершать работу\n";
-                //разблочим мьютекс
-                lk.unlock();
-            }
+            unique_lock<std::mutex> lk(join_mutex);
+            //waitим пока не поступил сигнал о завершении задачи
+            //далее идет проверка, если список задач пуст, то мы выходим из цикла
+            //иначе мы возвращаемся в эту же точку и ждем следующего сигнала
+            //и так по кругу пока список задач не пуст
+            //и для этого нужен unique_lock
+            task_complite.wait(lk, [this] {
+                //cout << "еще осталось " << list_tasks.size() << " задач" << endl;
+                return this->list_tasks.empty();
+            });
+            //cout << "все задачи выполнены можем завершать работу\n";
+            //разблочим мьютекс
+            lk.unlock();
 
             //устанавливаем флаг
             done = true;
             //сообщаем всем что работа завершена и мможем выходить из ожидания
             job_added.notify_all();
-            //джоиним все потоки чтобы не было ексепшона
-            for(auto &x : threads)
+            //джоиним все потоки
+            for(auto &x : threads) {
                 x.join();
+            }
             cout << "было выполнено - " << t << " задач\n";
         }
     };
